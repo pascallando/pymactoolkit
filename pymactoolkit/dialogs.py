@@ -59,7 +59,6 @@ def alert(text: str, message: str = "", alert_type: str = "informational", butto
     if buttons:
         lines.append('buttons {"%s", "%s"} default button "%s" cancel button "%s"' % (buttons['default'], buttons['cancel'], buttons['default'], buttons['cancel']))
 
-
     script = ' '.join(lines)
 
     p = Popen(["osascript", "-e", script], stdin=PIPE, stdout=PIPE, stderr=PIPE)
@@ -89,10 +88,7 @@ def prompt(message: str, default: str = "") -> str:
     ''
     """
     result: str = None
-
-    lines = ['set theResponse to display dialog "%s" default answer "%s"' % (message, default)]
-
-    script = ' '.join(lines)
+    script = 'set theResponse to display dialog "%s" default answer "%s"' % (message, default)
 
     p = Popen(["osascript", "-e", script], stdin=PIPE, stdout=PIPE, stderr=PIPE)
     output, err = p.communicate()
@@ -108,7 +104,35 @@ def prompt(message: str, default: str = "") -> str:
 
     return output
 
+def notification(title: str, message: str = "", subtitle: str = "", sound_name: str = None) -> None:
+    """Display a system notification.
+
+    Note
+    ----
+    Does not allow links, buttons and callbacks.
+
+    Parameters
+    ----------
+    sound_name:
+        Basso|Blow|Bottle|Frog|Funk|Glass|Hero|Morse|Ping|Pop|Purr|Sosumi|Submarine|Tink
+
+    Examples
+    --------
+    >>> notification("Hello!")
+
+    >>> notification(title="The title", subtitle="The subtitle", message="The message", sound_name="Pop")
+
+    """
+    lines = ['display notification "%s" with title "%s" subtitle "%s"' % (message, title, subtitle)]
+
+    if sound_name:
+        lines.append('sound name "%s"' % sound_name)
+
+    script = ' '.join(lines)
+
+    p = Popen(["osascript", "-e", script], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+
+
 if __name__ == "__main__":
     import doctest
     doctest.testmod()
-
