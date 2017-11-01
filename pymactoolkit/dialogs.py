@@ -1,7 +1,17 @@
 from subprocess import Popen, PIPE, call
 
+def say(text: str) -> None:
+    """Speaks a text (non-blocking)
+
+    Examples
+    --------
+    >>> say("Hello John!")
+
+    """
+    p = Popen(["say", text], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+
 def system_sound(name: str ='Hero') -> None:
-    """Play a system sound (not blocking).
+    """Play a system sound (non-blocking).
 
     Parameters
     ----------
@@ -66,7 +76,39 @@ def alert(text: str, message: str = "", alert_type: str = "informational", butto
 
     return output
 
+def prompt(message: str, default: str = "") -> str:
+    """Prompt the user.
+
+    Examples
+    --------
+    >>> prompt("Please type HELLO and click OK...")
+    'HELLO'
+    >>> prompt("Please type whatever and click Cancel...")
+
+    >>> prompt("Please leave the field empty and click OK...")
+    ''
+    """
+    result: str = None
+
+    lines = ['set theResponse to display dialog "%s" default answer "%s"' % (message, default)]
+
+    script = ' '.join(lines)
+
+    p = Popen(["osascript", "-e", script], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+    output, err = p.communicate()
+
+    if err:
+        exception_text = err.decode("utf-8").strip()
+        if exception_text.endswith('(-128)'):
+            output = None
+        else:
+            raise Exception(exception_text)
+    else:
+        output = output.decode("utf-8").strip().split(':')[2]
+
+    return output
 
 if __name__ == "__main__":
     import doctest
     doctest.testmod()
+
