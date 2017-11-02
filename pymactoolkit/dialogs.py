@@ -104,6 +104,36 @@ def prompt(message: str, default: str = "") -> str:
 
     return output
 
+def prompt_choice(message: str, choices: list, title: str = "") -> str:
+    """Prompting for a Choice from a List.
+
+    Examples
+    --------
+    >>> prompt_choice("Select DOG and click OK", choices=['DOG', 'BIRD', 'CAT'])
+    ['DOG']
+    >>> prompt_choice("Select DOG and CAT and click OK", choices=['DOG', 'BIRD', 'CAT'])
+    ['DOG', 'CAT']
+    >>> prompt_choice("Select whatever and cancel", choices=['DOG', 'BIRD', 'CAT'])
+
+    >>> prompt_choice("Select nothing and click OK", choices=['DOG', 'BIRD', 'CAT'], title="Empty selection")
+    []
+    """
+    list_as_string = ', '.join(['"{}"'.format(choice) for choice in choices])
+
+    script = 'choose from list {%s} with prompt "%s" with title "%s" with multiple selections allowed and empty selection allowed' % (list_as_string, message, title)
+
+    p = Popen(["osascript", "-e", script], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+    output, err = p.communicate()
+
+    output = output.decode("utf-8").strip().split(', ')
+
+    if output == ['false']:
+        output = None
+    elif output == ['']:
+        output = []
+
+    return output
+
 def notification(title: str, message: str = "", subtitle: str = "", sound_name: str = None) -> None:
     """Display a system notification.
 
